@@ -9,14 +9,14 @@
 | 실시간 | **Supabase Realtime** — Postgres Changes 구독 **+ Presence(커서/편집중)** | 변경 즉시 동기화 + 협업 인지 |
 | 드래그 | **네이티브 HTML5 Drag & Drop** (+ 모바일 대체: 편집에서 상태 변경) | 의존성 없음. 모바일은 대체 수단으로 커버 |
 | 상태 관리 | **React 내장** (useReducer + Context) + Supabase 구독 동기화 | 단일 보드 규모에 충분, 의존성 최소 |
-| 인증 | **없음(공유 보드)** — members에서 "나" 선택 | 스코프 최소화. Auth는 추후 개선 |
+| 인증 | **Google OAuth 게이트** (`@supabase/ssr`) + 공유 보드 | 로그인해야 진입(비로그인 → `/login`). 보드는 공유, 사용자별 권한은 추후 |
 | 테스트 | **Vitest + React Testing Library** | Next.js/TS 궁합, 빠름 |
 | 배포 | **Vercel** | Next.js 표준 배포, 프리뷰 배포 |
 
 ### 비채택 & 이유
 - **@dnd-kit / 라이브러리 DnD** — 사용자 요청대로 네이티브 HTML5 DnD 채택(모바일은 대체 UI로 처리).
 - **Zustand/Redux** — 단일 보드 상태엔 과함. 내장 상태 + 구독으로 충분.
-- **Supabase Auth(지금)** — 공유 보드로 진행, 인증은 확장 시.
+- **사용자별 소유권 RLS(지금)** — 공유 보드라 카드는 members 기반(`assignee_id`). Google 로그인은 접근 게이트로만, 사용자별 카드 소유 분리는 추후.
 - **localStorage 저장** — 실시간 협업 요구로 원격 DB(Supabase)로 전환. (테마 선택 값만 localStorage 유지)
 
 ## 폴더 구조
@@ -29,6 +29,8 @@ kanbanboard/
 │  ├─ app/
 │  │  ├─ layout.tsx           # 루트 레이아웃, ThemeProvider, 전역 스타일
 │  │  ├─ page.tsx             # 보드 페이지 (서버: 초기 데이터 fetch → 클라이언트로)
+│  │  ├─ login/page.tsx       # Google 로그인 (비로그인 랜딩)
+│  │  ├─ auth/callback/route.ts # OAuth 코드 교환 → 세션 쿠키
 │  │  └─ globals.css          # CSS 토큰(5테마) + 리셋
 │  ├─ components/
 │  │  ├─ board/
@@ -48,6 +50,7 @@ kanbanboard/
 │  │  ├─ supabase/
 │  │  │  ├─ client.ts         # 브라우저 클라이언트 (anon key)
 │  │  │  ├─ server.ts         # 서버 컴포넌트용 클라이언트
+│  │  │  ├─ middleware.ts     # 세션 갱신 + 비로그인 → /login 리다이렉트
 │  │  │  └─ queries.ts        # CRUD 쿼리 함수
 │  │  ├─ realtime/
 │  │  │  ├─ useCards.ts       # 카드 구독(Postgres Changes) 훅
@@ -61,6 +64,7 @@ kanbanboard/
 ├─ supabase/
 │  ├─ migrations/             # SQL 스키마·RLS
 │  └─ seed.sql                # 초기 팀원·샘플 카드
+│  └─ middleware.ts           # (src 안) 미들웨어 (lib/supabase/middleware 호출, 비로그인 → /login)
 ├─ .env.local                 # NEXT_PUBLIC_SUPABASE_URL / ANON_KEY (커밋 금지)
 ├─ .env.example
 └─ tests/                     # Vitest
@@ -172,7 +176,8 @@ Presence 채널(커서/편집중):  A track({cursor, editingCardId}) ⇄ Supabas
 ## 보안 / 환경
 
 - **환경변수**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (`.env.local`, 커밋 금지). service_role 키는 클라이언트에 절대 노출 금지.
-- **RLS**: 모든 테이블 `enable row level security`. 공유 보드이므로 **anon 역할에 select/insert/update/delete 허용** 정책을 명시적으로 부여(개방형). ⚠ 인증이 없으므로 URL/anon key를 아는 누구나 편집 가능 — 학습용 전제. 실제 배포 시 Auth+RLS 강화는 추후 개선.
+- **인증 게이트**: Google OAuth(`signInWithOAuth`) → `/auth/callback`에서 코드 교환. 미들웨어가 매 요청 세션을 검증(`getUser()`)하고, 비로그인 요청은 `/login`으로 리다이렉트(`/login`·`/auth`는 예외).
+- **RLS**: 모든 테이블 `enable row level security`. 로그인 게이트를 쓰므로 **`authenticated` 역할에만 select/insert/update/delete 허용**(anon은 전면 차단). 로그인한 사용자끼리는 공유 보드라 전체 카드 CRUD 가능. ⚠ 로그인한 누구나 남의 카드도 편집 가능(공유 전제) — 사용자별 소유권 제한은 추후 개선. `getSession()` 대신 서버에선 반드시 `getUser()` 사용(토큰 위조 방지).
 - **Vercel**: 프로젝트에 동일 env 등록. main 브랜치 → 프로덕션, PR → 프리뷰 배포.
 
 ## 성능·안정성
