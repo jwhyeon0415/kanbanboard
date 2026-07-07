@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코어 프로덕트 보드 · Height 스타일</title>
+<style>
+  :root{
+    --accent:#0EA5A5;            /* fresh teal */
+    --accent-soft:#E5F7F6;
+    --accent-deep:#0B8383;
+    --ink:#0F172A;
+    --muted:#64748B;
+    --line:#E7EAF0;
+    --bg:#F7F8FA;
+    --card:#FFFFFF;
+    --warn:#E03131;
+    --warn-soft:#FEECEC;
+    --soon:#E8940C;
+    --soon-soft:#FDF2E2;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 6px 20px rgba(16,24,40,.05);
+    --shadow-hover:0 2px 6px rgba(16,24,40,.06), 0 14px 34px rgba(16,24,40,.09);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Pretendard","Apple SD Gothic Neo","Segoe UI",system-ui,-apple-system,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  /* caption strip */
+  .caption{
+    background:linear-gradient(90deg,#0F172A,#134E4A);
+    color:#D9F2F0;
+    font-size:12.5px;
+    letter-spacing:.2px;
+    padding:8px 20px;
+    text-align:center;
+  }
+  .shell{max-width:1240px;margin:0 auto;padding:22px 24px 60px;}
+
+  /* ===== TOP BAR ===== */
+  .topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .logo{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),#22C7B8);
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px;
+    box-shadow:0 4px 12px rgba(14,165,165,.35);
+  }
+  .brand h1{font-size:19px;margin:0;font-weight:750;letter-spacing:-.3px;}
+  .brand .sub{font-size:12px;color:var(--muted);margin-top:1px;}
+  .topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+
+  /* view switcher tabs */
+  .viewswitch{
+    display:inline-flex;background:#EEF1F5;border-radius:12px;padding:4px;gap:2px;
+  }
+  .viewswitch button{
+    border:0;background:transparent;cursor:pointer;
+    font-size:13.5px;font-weight:600;color:var(--muted);
+    padding:7px 16px;border-radius:9px;font-family:inherit;
+    display:flex;align-items:center;gap:6px;transition:.15s;
+  }
+  .viewswitch button.active{
+    background:#fff;color:var(--ink);
+    box-shadow:0 1px 3px rgba(16,24,40,.12);
+  }
+  .viewswitch button:hover:not(.active){color:var(--ink);}
+  .viewswitch button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  .btn-primary{
+    background:var(--accent);color:#fff;border:0;border-radius:11px;
+    padding:9px 16px;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(14,165,165,.3);transition:.15s;
+  }
+  .btn-primary:hover{background:var(--accent-deep);}
+  .btn-primary:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+
+  /* avatar stack */
+  .stack{display:flex;align-items:center;}
+  .stack .av{
+    width:30px;height:30px;border-radius:50%;margin-left:-8px;
+    border:2px solid #fff;display:grid;place-items:center;
+    color:#fff;font-size:12px;font-weight:700;
+  }
+  .stack .av:first-child{margin-left:0;}
+  .stack .more{
+    width:30px;height:30px;border-radius:50%;margin-left:-8px;border:2px solid #fff;
+    background:#EEF1F5;color:var(--muted);font-size:11px;font-weight:700;
+    display:grid;place-items:center;
+  }
+
+  /* ===== FILTER / SORT ROW ===== */
+  .filterbar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:12px 14px;margin-bottom:22px;box-shadow:var(--shadow);
+  }
+  .chip{
+    border:1px solid var(--line);background:#fff;border-radius:999px;
+    padding:6px 13px;font-size:12.5px;font-weight:600;color:var(--muted);
+    cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:.15s;
+  }
+  .chip:hover{border-color:#CBD3DE;color:var(--ink);}
+  .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep);}
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+
+  .divider{width:1px;height:22px;background:var(--line);margin:0 2px;}
+
+  .sortsel{position:relative;}
+  select.sort{
+    appearance:none;-webkit-appearance:none;
+    border:1px solid var(--line);background:#fff;border-radius:999px;
+    padding:6px 30px 6px 13px;font-size:12.5px;font-weight:600;color:var(--ink);
+    cursor:pointer;font-family:inherit;
+  }
+  .sortsel::after{
+    content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    color:var(--muted);font-size:11px;pointer-events:none;
+  }
+  select.sort:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  .fb-right{margin-left:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+
+  /* progress */
+  .progress{display:flex;align-items:center;gap:10px;}
+  .progress .label{font-size:12.5px;font-weight:650;color:var(--muted);white-space:nowrap;}
+  .progress .track{width:120px;height:8px;border-radius:999px;background:#EDEFF3;overflow:hidden;}
+  .progress .fill{height:100%;width:25%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#2DD4BF);}
+  .streak{
+    display:inline-flex;align-items:center;gap:5px;
+    background:var(--soon-soft);color:#B45309;border:1px solid #F5D9A8;
+    border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:700;white-space:nowrap;
+  }
+
+  /* ===== BOARD ===== */
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start;}
+  .col{background:transparent;}
+  .col-head{
+    display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 4px;
+  }
+  .col-head .name{font-size:14px;font-weight:750;letter-spacing:-.2px;}
+  .col-head .count{
+    background:#EEF1F5;color:var(--muted);font-size:12px;font-weight:700;
+    border-radius:999px;min-width:22px;height:22px;padding:0 7px;display:grid;place-items:center;
+  }
+  .col-head .wip{
+    margin-left:auto;font-size:11px;font-weight:650;color:var(--soon);
+    background:var(--soon-soft);border-radius:999px;padding:3px 9px;
+  }
+  .col-head .swatch{width:9px;height:9px;border-radius:3px;}
+  .col-add{
+    width:100%;border:1px dashed var(--line);background:transparent;border-radius:12px;
+    padding:9px;color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;
+    font-family:inherit;margin-top:2px;transition:.15s;
+  }
+  .col-add:hover{border-color:var(--accent);color:var(--accent-deep);background:var(--accent-soft);}
+
+  .cards{display:flex;flex-direction:column;gap:12px;margin-bottom:12px;}
+
+  /* card */
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 15px 13px;box-shadow:var(--shadow);position:relative;
+    border-left:3px solid transparent;transition:.16s;cursor:pointer;
+  }
+  .card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px);}
+  .card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .card.p-high{border-left-color:var(--warn);}
+  .card.p-med{border-left-color:var(--soon);}
+  .card.p-low{border-left-color:#94A3B8;}
+
+  .card .top{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+  .prio{
+    font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+    border-radius:6px;padding:2px 7px;
+  }
+  .prio.high{background:var(--warn-soft);color:var(--warn);}
+  .prio.med{background:var(--soon-soft);color:#B45309;}
+  .prio.low{background:#F1F5F9;color:#64748B;}
+  .card .title{font-size:14px;font-weight:650;line-height:1.4;letter-spacing:-.2px;margin-bottom:12px;}
+
+  .card .foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .assignee{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#F5F7FA;border-radius:999px;padding:3px 10px 3px 3px;font-size:12px;font-weight:600;color:var(--ink);
+  }
+  .assignee .av{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:10.5px;font-weight:700;}
+  .assignee.none{background:#FBEAF0;color:#A61E4D;border:1px dashed #E9A0BC;padding-left:10px;}
+
+  .due{
+    display:inline-flex;align-items:center;gap:4px;
+    background:#F1F5F9;color:var(--muted);border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:650;
+  }
+  .due.soon{background:var(--warn-soft);color:var(--warn);}
+  .due.mild{background:var(--soon-soft);color:#B45309;}
+
+  .card.done .title{color:var(--muted);text-decoration:line-through;text-decoration-color:#CBD5E1;}
+  .card.done{opacity:.9;}
+  .check{
+    width:18px;height:18px;border-radius:50%;background:var(--accent);
+    display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900;
+  }
+
+  footer{margin-top:34px;text-align:center;color:#9AA4B2;font-size:11.5px;}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:700px){
+    .board{grid-template-columns:1fr;}
+    .fb-right{width:100%;}
+    .topbar-right{width:100%;margin-left:0;}
+    .viewswitch{flex:1;}
+    .viewswitch button{flex:1;justify-content:center;}
+  }
+</style>
+</head>
+<body>
+  <div class="caption">시안 E — Height 스타일 · 뷰 스위처 + 필터 바 + 모던 카드</div>
+
+  <div class="shell">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">코</div>
+        <div>
+          <h1>코어 프로덕트 보드</h1>
+          <div class="sub">제품팀 · 스프린트 12</div>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <nav class="viewswitch" aria-label="뷰 전환">
+          <button class="active" aria-current="page">▦ 보드</button>
+          <button>☰ 리스트</button>
+          <button>▤ 캘린더</button>
+        </nav>
+        <div class="stack" aria-label="팀 멤버">
+          <div class="av" style="background:#4C6EF5" title="지훈 (PM)">지</div>
+          <div class="av" style="background:#2F9E44" title="수민">수</div>
+          <div class="av" style="background:#E8940C" title="태오">태</div>
+          <div class="av" style="background:#9C36B5" title="민아">민</div>
+          <div class="av" style="background:#E03131" title="준">준</div>
+        </div>
+        <button class="btn-primary">＋ 새 카드</button>
+      </div>
+    </header>
+
+    <!-- FILTER / SORT ROW -->
+    <div class="filterbar">
+      <button class="chip on"><span class="dot"></span>내 카드만</button>
+      <button class="chip">이번 주 마감</button>
+      <button class="chip">High만</button>
+      <div class="divider"></div>
+      <div class="sortsel">
+        <select class="sort" aria-label="정렬 방식">
+          <option>정렬: 수동</option>
+          <option>정렬: 내 것 우선</option>
+          <option>정렬: 급한 것 우선</option>
+        </select>
+      </div>
+
+      <div class="fb-right">
+        <div class="streak">🔥 3일 연속</div>
+        <div class="progress">
+          <span class="label">오늘 완료 2 / 8</span>
+          <div class="track"><div class="fill"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOARD -->
+    <main class="board">
+
+      <!-- TO DO -->
+      <section class="col" aria-label="To Do">
+        <div class="col-head">
+          <span class="swatch" style="background:#94A3B8"></span>
+          <span class="name">To Do</span>
+          <span class="count">3</span>
+        </div>
+        <div class="cards">
+
+          <article class="card p-high" tabindex="0">
+            <div class="top"><span class="prio high">High</span></div>
+            <div class="title">로그인 API 설계</div>
+            <div class="foot">
+              <span class="assignee"><span class="av" style="background:#2F9E44">수</span>수민</span>
+              <span class="due mild">📅 07-03</span>
+            </div>
+          </article>
+
+          <article class="card p-med" tabindex="0">
+            <div class="top"><span class="prio med">Medium</span></div>
+            <div class="title">온보딩 카피 작성</div>
+            <div class="foot">
+              <span class="assignee"><span class="av" style="background:#9C36B5">민</span>민아</span>
+              <span class="due">📅 07-05</span>
+            </div>
+          </article>
+
+          <article class="card p-low" tabindex="0">
+            <div class="top"><span class="prio low">Low</span></div>
+            <div class="title">경쟁사 리서치</div>
+            <div class="foot">
+              <span class="assignee none">＋ 미배정</span>
+              <span class="due">마감 없음</span>
+            </div>
+          </article>
+
+        </div>
+        <button class="col-add">＋ 카드 추가</button>
+      </section>
+
+      <!-- DOING -->
+      <section class="col" aria-label="Doing">
+        <div class="col-head">
+          <span class="swatch" style="background:#0EA5A5"></span>
+          <span class="name">Doing</span>
+          <span class="count">3</span>
+          <span class="wip">WIP 권장 3</span>
+        </div>
+        <div class="cards">
+
+          <article class="card p-high" tabindex="0">
+            <div class="top"><span class="prio high">High</span></div>
+            <div class="title">메인 대시보드 UI</div>
+            <div class="foot">
+              <span class="assignee"><span class="av" style="background:#E8940C">태</span>태오</span>
+              <span class="due mild">📅 07-02</span>
+            </div>
+          </article>
+
+          <article class="card p-high" tabindex="0">
+            <div class="top"><span class="prio high">High</span></div>
+            <div class="title">DB 스키마 마이그레이션</div>
+            <div class="foot">
+              <span class="assignee"><span class="av" style="background:#E03131">준</span>준</span>
+              <span class="due soon">⚠ 오늘 마감 07-01</span>
+            </div>
+          </article>
+
+          <article class="card p-med" tabindex="0">
+            <div class="top"><span class="prio med">Medium</span></div>
+            <div class="title">결제 모듈 연동</div>
+            <div class="foot">
+              <span class="assignee"><span class="av" style="background:#2F9E44">수</span>수민</span>
+              <span class="due">마감 없음</span>
+            </div>
+          </article>
+
+        </div>
+        <button class="col-add">＋ 카드 추가</button>
+      </section>
+
+      <!-- DONE -->
+      <section class="col" aria-label="Done">
+        <div class="col-head">
+          <span class="swatch" style="background:#2F9E44"></span>
+          <span class="name">Done</span>
+          <span class="count">2</span>
+        </div>
+        <div class="cards">
+
+          <article class="card done p-low" tabindex="0">
+            <div class="top"><span class="check">✓</span></div>
+            <div class="title">프로젝트 킥오프</div>
+            <div class="foot">
+              <span class="assignee"><span class="av" style="background:#4C6EF5">지</span>지훈</span>
+            </div>
+          </article>
+
+          <article class="card done p-low" tabindex="0">
+            <div class="top"><span class="check">✓</span></div>
+            <div class="title">레포 세팅</div>
+            <div class="foot">
+              <span class="assignee"><span class="av" style="background:#E03131">준</span>준</span>
+            </div>
+          </article>
+
+        </div>
+        <button class="col-add">＋ 카드 추가</button>
+      </section>
+
+    </main>
+
+    <footer>코어 프로덕트 보드 · 2026-07-01 기준 · Height 스타일 시안</footer>
+  </div>
+</body>
+</html>

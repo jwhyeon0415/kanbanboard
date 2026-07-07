@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>칸반 보드 — 디자인 시안 비교</title>
+<style>
+  :root { --ink:#1a1a1a; --sub:#666; --line:#e5e5e5; --bg:#fafafa; --accent:#4C6EF5; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; color:var(--ink); background:var(--bg); }
+  header.top { padding:40px 24px 28px; max-width:1100px; margin:0 auto; }
+  header.top h1 { font-size:26px; margin:0 0 8px; }
+  header.top p { color:var(--sub); margin:4px 0; line-height:1.6; }
+  .nav { position:sticky; top:0; z-index:10; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  .nav-inner { max-width:1100px; margin:0 auto; display:flex; gap:8px; flex-wrap:wrap; padding:12px 24px; }
+  .nav a { text-decoration:none; color:var(--ink); font-size:13px; padding:7px 13px; border:1px solid var(--line); border-radius:999px; background:#fff; transition:.15s; }
+  .nav a:hover { border-color:var(--accent); color:var(--accent); }
+  .table-wrap { max-width:1100px; margin:0 auto 12px; padding:0 24px; overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:13px; background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th,td { text-align:left; padding:11px 13px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:#f5f6f8; font-weight:600; }
+  tr:last-child td { border-bottom:none; }
+  .tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:6px; background:#eef; color:#334; }
+  section.frame { max-width:1180px; margin:0 auto; padding:22px 24px 8px; }
+  .frame h2 { font-size:19px; margin:0 0 4px; }
+  .frame .meta { color:var(--sub); font-size:13px; margin:0 0 14px; line-height:1.55; }
+  .viewport { border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.05); background:#fff; }
+  iframe { width:100%; height:680px; border:0; display:block; }
+  .open { font-size:12px; color:var(--accent); text-decoration:none; }
+  footer { text-align:center; color:var(--sub); font-size:12px; padding:40px 24px 60px; }
+</style>
+</head>
+<body>
+  <header class="top">
+    <h1>칸반 보드 — 디자인 시안 비교 (5안)</h1>
+    <p>미니멀·차분 톤을 공통 기준으로, 레퍼런스 앱 5개의 <b>레이아웃 구조</b>를 각각 살렸습니다. 동일한 샘플 데이터(팀원 5명·카드 8장)로 비교합니다.</p>
+    <p>각 시안을 스크롤해 살펴본 뒤, 아래로 내려가며 A~E를 비교해보세요. 마음에 드는 하나를 고르시거나 <b>하이브리드</b>(예: “C 레이아웃 + E 카드”)도 가능합니다.</p>
+  </header>
+
+  <div class="nav"><div class="nav-inner">
+    <a href="#a">A · Trello</a>
+    <a href="#b">B · Linear</a>
+    <a href="#c">C · Notion</a>
+    <a href="#d">D · Jira</a>
+    <a href="#e">E · Height</a>
+  </div></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>시안</th><th>레이아웃 구조</th><th>분위기</th><th>강점</th><th>약점</th><th>잘 맞는 사람</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>A · Trello</b></td>
+          <td>상단 헤더 + 가로 3컬럼<br>(사이드바 없음)</td>
+          <td>부드러운 종이 카드</td>
+          <td>상태를 공간으로 즉시 파악, 담당자 가시성 강함</td>
+          <td>카드 적으면 가로 공간 낭비</td>
+          <td>매일 훑는 PM (지훈)</td>
+        </tr>
+        <tr>
+          <td><b>B · Linear</b></td>
+          <td>좁은 좌측 사이드바 + 고밀도 보드</td>
+          <td>거의 모노톤 + 단일 액센트</td>
+          <td>정보 밀도 최고, 스캔 빠름, 키보드 친화</td>
+          <td>촘촘한 타입은 터치에서 답답할 수 있음</td>
+          <td>속도 중시 파워유저</td>
+        </tr>
+        <tr>
+          <td><b>C · Notion</b></td>
+          <td>넓은 좌측 네비 + 문서형 보드</td>
+          <td>따뜻한 종이 뉴트럴, 에디토리얼</td>
+          <td>차분·여백, 읽기 좋음, 낮은 시각 소음</td>
+          <td>넓은 사이드바가 보드 공간 잠식</td>
+          <td>차분함 선호 (수민)</td>
+        </tr>
+        <tr>
+          <td><b>D · Jira</b></td>
+          <td>상단바 + 아이콘 네비 + 고밀도 카드</td>
+          <td>프로페셔널 슬레이트·블루</td>
+          <td>메타데이터 풍부(이슈키·뱃지·WIP), 책임 명확</td>
+          <td>가장 밀도 높아 스캔 부담, 아이콘 네비 학습 필요</td>
+          <td>스프린트 운영 리드 (지훈·관리)</td>
+        </tr>
+        <tr>
+          <td><b>E · Height</b></td>
+          <td>뷰 스위처 탭 + 필터 바 + 모던 카드</td>
+          <td>프레시 틸 액센트, 세련된 SaaS</td>
+          <td>깔끔·경쾌, 필터/정렬 접근 좋음</td>
+          <td>좌측 네비 없어 깊은 탐색 제약, 팔레트가 다소 범용적</td>
+          <td>가벼운 모던 도구 선호</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <section class="frame" id="a">
+    <h2>시안 A · Trello 스타일 <a class="open" href="concept-trello.html" target="_blank">↗ 새 탭에서 크게 보기</a></h2>
+    <p class="meta">가로 3컬럼 보드 · 종이 카드가 떠 있는 구조. 상태를 한눈에 훑기 좋음.</p>
+    <div class="viewport"><iframe src="concept-trello.html" title="Trello 시안"></iframe></div>
+  </section>
+
+  <section class="frame" id="b">
+    <h2>시안 B · Linear 스타일 <a class="open" href="concept-linear.html" target="_blank">↗ 새 탭에서 크게 보기</a></h2>
+    <p class="meta">좁은 사이드바 + 고밀도 보드 · 거의 모노톤에 급한 것/진척만 색을 씀.</p>
+    <div class="viewport"><iframe src="concept-linear.html" title="Linear 시안"></iframe></div>
+  </section>
+
+  <section class="frame" id="c">
+    <h2>시안 C · Notion 스타일 <a class="open" href="concept-notion.html" target="_blank">↗ 새 탭에서 크게 보기</a></h2>
+    <p class="meta">넓은 사이드바 + 문서형 보드 · 따뜻한 뉴트럴, 여백 넉넉한 블록 카드.</p>
+    <div class="viewport"><iframe src="concept-notion.html" title="Notion 시안"></iframe></div>
+  </section>
+
+  <section class="frame" id="d">
+    <h2>시안 D · Jira 스타일 <a class="open" href="concept-jira.html" target="_blank">↗ 새 탭에서 크게 보기</a></h2>
+    <p class="meta">상단바 + 아이콘 네비 + 고밀도 카드 · 이슈키·우선순위 뱃지·WIP 제한 표시.</p>
+    <div class="viewport"><iframe src="concept-jira.html" title="Jira 시안"></iframe></div>
+  </section>
+
+  <section class="frame" id="e">
+    <h2>시안 E · Height 스타일 <a class="open" href="concept-height.html" target="_blank">↗ 새 탭에서 크게 보기</a></h2>
+    <p class="meta">뷰 스위처 탭 + 필터 바 + 모던 카드 · 프레시 틸 액센트의 세련된 SaaS 톤.</p>
+    <div class="viewport"><iframe src="concept-height.html" title="Height 시안"></iframe></div>
+  </section>
+
+  <footer>어떤 시안이 좋으세요? 하나를 고르거나 하이브리드로 말씀해주세요. · 5개 시안 · 동일 샘플 데이터</footer>
+</body>
+</html>

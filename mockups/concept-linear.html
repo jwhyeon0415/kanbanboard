@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코어 프로덕트 보드 — Linear 스타일</title>
+<style>
+  :root{
+    --bg:#fbfbfc;
+    --panel:#ffffff;
+    --sidebar:#f7f7f8;
+    --line:#e8e8ec;
+    --line-strong:#dcdce1;
+    --ink:#1c1d22;
+    --ink-2:#52545c;
+    --ink-3:#8a8c96;
+    --ink-4:#a9abb4;
+    --accent:#5b5bd6;
+    --accent-soft:#eeeefc;
+    --warn:#e8940c;
+    --warn-soft:#fdf4e6;
+    --danger:#e03131;
+    --radius:6px;
+    --shadow:0 1px 2px rgba(20,20,30,.04);
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:13px;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    letter-spacing:-.01em;
+  }
+  /* caption strip */
+  .caption{
+    background:#15151a;
+    color:#d9d9e0;
+    font-size:11.5px;
+    padding:6px 16px;
+    letter-spacing:.01em;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .caption b{color:#fff;font-weight:600;}
+  .caption .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+  .app{
+    display:grid;
+    grid-template-columns:204px 1fr;
+    height:calc(100vh - 29px);
+    min-height:560px;
+  }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar{
+    background:var(--sidebar);
+    border-right:1px solid var(--line);
+    padding:14px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    overflow-y:auto;
+  }
+  .board-id{display:flex;align-items:center;gap:8px;padding:2px 6px;}
+  .board-glyph{
+    width:22px;height:22px;border-radius:6px;
+    background:linear-gradient(145deg,#6a6ae0,#4a4ac0);
+    color:#fff;font-weight:700;font-size:12px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .board-name{font-weight:600;font-size:13px;color:var(--ink);line-height:1.2;}
+  .board-sub{font-size:10.5px;color:var(--ink-4);}
+
+  .nav-group{display:flex;flex-direction:column;gap:1px;}
+  .nav-label{
+    font-size:10px;font-weight:600;letter-spacing:.06em;
+    color:var(--ink-4);text-transform:uppercase;
+    padding:0 8px 4px;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:8px;
+    padding:5px 8px;border-radius:5px;
+    color:var(--ink-2);cursor:pointer;font-size:12.5px;
+    text-decoration:none;
+  }
+  .nav-item .ico{width:14px;text-align:center;color:var(--ink-4);font-size:12px;}
+  .nav-item .count{margin-left:auto;font-size:11px;color:var(--ink-4);}
+  .nav-item:hover{background:#efeff1;}
+  .nav-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600;}
+  .nav-item.active .ico{color:var(--accent);}
+  .nav-item:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+
+  .members{display:flex;flex-direction:column;gap:1px;}
+  .member{
+    display:flex;align-items:center;gap:8px;
+    padding:4px 8px;border-radius:5px;font-size:12px;color:var(--ink-2);
+  }
+  .member:hover{background:#efeff1;}
+  .mdot{
+    width:16px;height:16px;border-radius:50%;flex-shrink:0;
+    color:#fff;font-size:9px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    letter-spacing:0;
+  }
+  .member .role{margin-left:auto;font-size:10px;color:var(--ink-4);}
+
+  .kbd-hint{
+    margin-top:auto;padding:8px;border-top:1px solid var(--line);
+    font-size:10.5px;color:var(--ink-4);display:flex;align-items:center;gap:6px;
+  }
+  kbd{
+    font-family:inherit;font-size:10px;
+    background:#fff;border:1px solid var(--line-strong);
+    border-radius:4px;padding:1px 5px;color:var(--ink-2);
+    box-shadow:0 1px 0 var(--line-strong);
+  }
+
+  /* ============ MAIN ============ */
+  .main{display:flex;flex-direction:column;overflow:hidden;}
+
+  .toolbar{
+    display:flex;align-items:center;gap:14px;
+    padding:9px 16px;border-bottom:1px solid var(--line);
+    background:var(--panel);flex-wrap:wrap;
+  }
+  .toolbar .title{font-weight:600;font-size:13.5px;margin-right:2px;}
+
+  /* progress */
+  .progress{display:flex;align-items:center;gap:8px;}
+  .progress .lbl{font-size:11.5px;color:var(--ink-2);white-space:nowrap;}
+  .bar{width:96px;height:5px;border-radius:3px;background:var(--line-strong);overflow:hidden;}
+  .bar > i{display:block;height:100%;width:25%;background:var(--accent);border-radius:3px;}
+
+  .streak{
+    display:flex;align-items:center;gap:4px;font-size:11.5px;
+    color:var(--warn);font-weight:600;
+    background:var(--warn-soft);padding:2px 8px;border-radius:20px;
+  }
+
+  .tb-spacer{flex:1;}
+
+  .toggles{display:flex;gap:6px;}
+  .toggle{
+    font-size:11.5px;color:var(--ink-2);
+    border:1px solid var(--line-strong);background:#fff;
+    padding:3px 9px;border-radius:20px;cursor:pointer;
+    display:flex;align-items:center;gap:5px;
+  }
+  .toggle:hover{border-color:var(--ink-4);}
+  .toggle.on{background:var(--accent-soft);border-color:#c9c9f2;color:var(--accent);font-weight:600;}
+  .toggle:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+
+  .sort{
+    font-size:11.5px;color:var(--ink-2);
+    border:1px solid var(--line-strong);background:#fff;
+    padding:4px 8px;border-radius:6px;
+    font-family:inherit;cursor:pointer;
+  }
+  .sort:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+
+  .new-btn{
+    font-size:11.5px;font-weight:600;color:#fff;background:var(--accent);
+    border:none;padding:5px 11px;border-radius:6px;cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+  }
+  .new-btn kbd{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;box-shadow:none;}
+  .new-btn:focus-visible{outline:2px solid #000;outline-offset:1px;}
+
+  /* board */
+  .board{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:0;
+    flex:1;
+    overflow:auto;
+  }
+  .col{
+    border-right:1px solid var(--line);
+    display:flex;flex-direction:column;min-width:0;
+  }
+  .col:last-child{border-right:none;}
+  .col-head{
+    display:flex;align-items:center;gap:8px;
+    padding:10px 14px 8px;
+    position:sticky;top:0;background:var(--bg);z-index:1;
+  }
+  .col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .col-dot.todo{background:var(--ink-4);}
+  .col-dot.doing{background:var(--accent);}
+  .col-dot.done{background:#2f9e44;}
+  .col-title{font-weight:600;font-size:12px;color:var(--ink);}
+  .col-count{
+    font-size:11px;color:var(--ink-4);font-weight:600;
+    background:var(--line);border-radius:20px;padding:0 7px;min-width:20px;text-align:center;
+  }
+  .col-add{margin-left:auto;color:var(--ink-4);cursor:pointer;font-size:15px;line-height:1;padding:0 4px;}
+  .col-add:hover{color:var(--ink);}
+
+  /* WIP warning on Doing */
+  .col.wip .col-head{background:var(--warn-soft);}
+  .col.wip .col-count{background:#f6dcb0;color:#a6640a;}
+  .wip-tag{font-size:10px;color:var(--warn);font-weight:600;margin-left:6px;}
+
+  .col-body{padding:4px 8px 16px;display:flex;flex-direction:column;gap:3px;}
+  .col.wip .col-body{background:linear-gradient(var(--warn-soft),transparent 120px);}
+
+  /* card row */
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:8px 10px 7px;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .card:hover{border-color:var(--line-strong);background:#fdfdfe;}
+  .card:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+
+  .card-top{display:flex;align-items:flex-start;gap:7px;}
+  .card-title{font-size:12.5px;color:var(--ink);font-weight:500;line-height:1.35;flex:1;}
+  .card.done .card-title{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--line-strong);}
+
+  /* priority glyph (Linear-style bars) */
+  .prio{display:inline-flex;align-items:flex-end;gap:1.5px;height:11px;margin-top:2px;flex-shrink:0;}
+  .prio i{width:2.5px;border-radius:1px;background:var(--line-strong);}
+  .prio i:nth-child(1){height:4px;}
+  .prio i:nth-child(2){height:7px;}
+  .prio i:nth-child(3){height:10px;}
+  .prio.high i{background:var(--danger);}
+  .prio.med i:nth-child(1),.prio.med i:nth-child(2){background:var(--warn);}
+  .prio.low i:nth-child(1){background:var(--ink-4);}
+
+  /* meta row */
+  .meta{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--ink-3);}
+  .assignee{display:flex;align-items:center;gap:4px;}
+  .adot{
+    width:15px;height:15px;border-radius:50%;flex-shrink:0;
+    color:#fff;font-size:8.5px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .adot.unassigned{
+    background:transparent;border:1.5px dashed var(--ink-4);color:var(--ink-4);
+    font-weight:400;
+  }
+  .aname{color:var(--ink-2);}
+  .meta .sep{color:var(--line-strong);}
+  .due{display:inline-flex;align-items:center;gap:3px;}
+  .due.soon{color:var(--danger);font-weight:600;}
+  .due.none{color:var(--ink-4);}
+  .due .pulse{width:5px;height:5px;border-radius:50%;background:var(--danger);}
+  .tag-high{
+    font-size:9.5px;font-weight:700;color:var(--danger);
+    background:#fdeaea;border-radius:3px;padding:0 4px;letter-spacing:.02em;
+  }
+  .check{
+    width:14px;height:14px;border-radius:50%;background:#2f9e44;
+    color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;margin-top:1px;
+  }
+
+  @media (max-width:700px){
+    .app{grid-template-columns:1fr;height:auto;}
+    .sidebar{
+      flex-direction:row;flex-wrap:wrap;align-items:center;
+      border-right:none;border-bottom:1px solid var(--line);gap:10px;
+    }
+    .nav-group,.members{flex-direction:row;flex-wrap:wrap;}
+    .nav-label,.kbd-hint{display:none;}
+    .board{grid-template-columns:1fr;}
+    .col{border-right:none;border-bottom:1px solid var(--line);}
+    .toolbar{gap:10px;}
+    .tb-spacer{flex-basis:100%;height:0;}
+  }
+</style>
+</head>
+<body>
+  <div class="caption"><span class="dot"></span> 시안 B — Linear 스타일 · <b>좁은 사이드바 + 고밀도 보드</b></div>
+
+  <div class="app">
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+      <div class="board-id">
+        <div class="board-glyph">코</div>
+        <div>
+          <div class="board-name">코어 프로덕트 보드</div>
+          <div class="board-sub">8 이슈 · 5 멤버</div>
+        </div>
+      </div>
+
+      <nav class="nav-group" aria-label="뷰">
+        <div class="nav-label">뷰</div>
+        <a class="nav-item active" href="#" tabindex="0"><span class="ico">▤</span> 모든 이슈 <span class="count">8</span></a>
+        <a class="nav-item" href="#" tabindex="0"><span class="ico">◔</span> 내 카드 <span class="count">2</span></a>
+        <a class="nav-item" href="#" tabindex="0"><span class="ico">◷</span> 이번 주 <span class="count">4</span></a>
+      </nav>
+
+      <nav class="nav-group" aria-label="필터">
+        <div class="nav-label">필터</div>
+        <a class="nav-item" href="#" tabindex="0"><span class="ico">▲</span> High 우선순위 <span class="count">3</span></a>
+        <a class="nav-item" href="#" tabindex="0"><span class="ico">◇</span> 미배정 <span class="count">1</span></a>
+      </nav>
+
+      <div class="members" aria-label="멤버">
+        <div class="nav-label">멤버</div>
+        <div class="member"><span class="mdot" style="background:#4C6EF5">지</span> 지훈 <span class="role">PM</span></div>
+        <div class="member"><span class="mdot" style="background:#2F9E44">수</span> 수민</div>
+        <div class="member"><span class="mdot" style="background:#E8940C">태</span> 태오</div>
+        <div class="member"><span class="mdot" style="background:#9C36B5">민</span> 민아</div>
+        <div class="member"><span class="mdot" style="background:#E03131">준</span> 준</div>
+      </div>
+
+      <div class="kbd-hint"><kbd>C</kbd> 새 이슈 · <kbd>/</kbd> 검색</div>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <main class="main">
+      <div class="toolbar">
+        <span class="title">모든 이슈</span>
+
+        <div class="progress" title="오늘 완료 2 / 8">
+          <span class="lbl">오늘 완료 2 / 8</span>
+          <div class="bar" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="8"><i></i></div>
+        </div>
+
+        <div class="streak" title="3일 연속 완료">🔥 3일</div>
+
+        <div class="tb-spacer"></div>
+
+        <div class="toggles" role="group" aria-label="필터 토글">
+          <button class="toggle" type="button">내 카드만</button>
+          <button class="toggle" type="button">이번 주 마감</button>
+          <button class="toggle on" type="button">High만 ✓</button>
+        </div>
+
+        <label class="visually-hidden" for="sort" style="position:absolute;left:-9999px;">정렬</label>
+        <select class="sort" id="sort">
+          <option>정렬: 수동</option>
+          <option>정렬: 내 것 우선</option>
+          <option selected>정렬: 급한 것 우선</option>
+        </select>
+
+        <button class="new-btn" type="button">새 이슈 <kbd>C</kbd></button>
+      </div>
+
+      <div class="board">
+        <!-- ===== To Do ===== -->
+        <section class="col" aria-label="할 일">
+          <div class="col-head">
+            <span class="col-dot todo"></span>
+            <span class="col-title">할 일</span>
+            <span class="col-count">3</span>
+            <span class="col-add" title="새 이슈">＋</span>
+          </div>
+          <div class="col-body">
+
+            <article class="card" tabindex="0">
+              <div class="card-top">
+                <span class="prio high" title="High"><i></i><i></i><i></i></span>
+                <span class="card-title">로그인 API 설계</span>
+              </div>
+              <div class="meta">
+                <span class="assignee"><span class="adot" style="background:#2F9E44">수</span><span class="aname">수민</span></span>
+                <span class="sep">·</span>
+                <span class="due">07-03</span>
+                <span class="tag-high">HIGH</span>
+              </div>
+            </article>
+
+            <article class="card" tabindex="0">
+              <div class="card-top">
+                <span class="prio med" title="Medium"><i></i><i></i><i></i></span>
+                <span class="card-title">온보딩 카피 작성</span>
+              </div>
+              <div class="meta">
+                <span class="assignee"><span class="adot" style="background:#9C36B5">민</span><span class="aname">민아</span></span>
+                <span class="sep">·</span>
+                <span class="due">07-05</span>
+              </div>
+            </article>
+
+            <article class="card" tabindex="0">
+              <div class="card-top">
+                <span class="prio low" title="Low"><i></i><i></i><i></i></span>
+                <span class="card-title">경쟁사 리서치</span>
+              </div>
+              <div class="meta">
+                <span class="assignee"><span class="adot unassigned" title="미배정">?</span><span class="aname">미배정</span></span>
+                <span class="sep">·</span>
+                <span class="due none">마감 없음</span>
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- ===== Doing (WIP) ===== -->
+        <section class="col wip" aria-label="진행 중">
+          <div class="col-head">
+            <span class="col-dot doing"></span>
+            <span class="col-title">진행 중</span>
+            <span class="col-count">3</span>
+            <span class="wip-tag">WIP 초과</span>
+            <span class="col-add" title="새 이슈">＋</span>
+          </div>
+          <div class="col-body">
+
+            <article class="card" tabindex="0">
+              <div class="card-top">
+                <span class="prio high" title="High"><i></i><i></i><i></i></span>
+                <span class="card-title">메인 대시보드 UI</span>
+              </div>
+              <div class="meta">
+                <span class="assignee"><span class="adot" style="background:#E8940C">태</span><span class="aname">태오</span></span>
+                <span class="sep">·</span>
+                <span class="due soon">07-02 임박</span>
+                <span class="tag-high">HIGH</span>
+              </div>
+            </article>
+
+            <article class="card" tabindex="0">
+              <div class="card-top">
+                <span class="prio high" title="High"><i></i><i></i><i></i></span>
+                <span class="card-title">DB 스키마 마이그레이션</span>
+              </div>
+              <div class="meta">
+                <span class="assignee"><span class="adot" style="background:#E03131">준</span><span class="aname">준</span></span>
+                <span class="sep">·</span>
+                <span class="due soon"><span class="pulse"></span>오늘 · 07-01</span>
+                <span class="tag-high">HIGH</span>
+              </div>
+            </article>
+
+            <article class="card" tabindex="0">
+              <div class="card-top">
+                <span class="prio med" title="Medium"><i></i><i></i><i></i></span>
+                <span class="card-title">결제 모듈 연동</span>
+              </div>
+              <div class="meta">
+                <span class="assignee"><span class="adot" style="background:#2F9E44">수</span><span class="aname">수민</span></span>
+                <span class="sep">·</span>
+                <span class="due none">마감 없음</span>
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- ===== Done ===== -->
+        <section class="col" aria-label="완료">
+          <div class="col-head">
+            <span class="col-dot done"></span>
+            <span class="col-title">완료</span>
+            <span class="col-count">2</span>
+            <span class="col-add" title="새 이슈">＋</span>
+          </div>
+          <div class="col-body">
+
+            <article class="card done" tabindex="0">
+              <div class="card-top">
+                <span class="check">✓</span>
+                <span class="card-title">프로젝트 킥오프</span>
+              </div>
+              <div class="meta">
+                <span class="assignee"><span class="adot" style="background:#4C6EF5">지</span><span class="aname">지훈</span></span>
+              </div>
+            </article>
+
+            <article class="card done" tabindex="0">
+              <div class="card-top">
+                <span class="check">✓</span>
+                <span class="card-title">레포 세팅</span>
+              </div>
+              <div class="meta">
+                <span class="assignee"><span class="adot" style="background:#E03131">준</span><span class="aname">준</span></span>
+              </div>
+            </article>
+
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

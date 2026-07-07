@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코어 프로덕트 보드 — D 기반 (컬럼 배경 제거)</title>
+<style>
+  :root{
+    --bg:#FBF9F5;
+    --surface:#FFFFFF;
+    --ink:#3B342E;
+    --ink-soft:#5C534B;
+    --ink-mute:#8A7F74;
+    --line:#EFE8DE;
+    --line-soft:#F4EEE6;
+    --blue:#5B7CE0;
+    --blue-deep:#4C6EF5;
+    --navbg:#4A423B;
+    --navbg-2:#3B342E;
+    --todo:#B4A798;
+    --doing:#5B7CE0;
+    --done:#2F9E44;
+    --high-bg:#FBE7E2;--high-fg:#C0503C;
+    --med-bg:#FBF0DC;--med-fg:#B07B2E;
+    --low-bg:#E9EFFB;--low-fg:#4C6EF5;
+    --warn-bg:#FBE7E2;--warn-fg:#C0503C;
+    --shadow:0 2px 6px rgba(92,72,48,.07),0 1px 2px rgba(92,72,48,.04);
+    --shadow-lift:0 10px 24px -6px rgba(92,72,48,.16),0 2px 6px rgba(92,72,48,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    background:var(--bg);color:var(--ink);
+    font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+
+  /* caption strip */
+  .caption{
+    background:var(--navbg-2);color:#E6DED3;
+    font-size:11.5px;letter-spacing:.2px;
+    padding:7px 18px;border-bottom:none;
+  }
+  .caption b{color:#fff;font-weight:600;}
+
+  /* top app header */
+  .appbar{
+    height:52px;background:var(--surface);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:14px;padding:0 16px;
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);font-size:14px;}
+  .brand .logo{
+    width:26px;height:26px;border-radius:9px;
+    background:linear-gradient(135deg,var(--blue),#9B8AF0);
+    display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;
+  }
+  .switcher{
+    display:flex;align-items:center;gap:8px;margin-left:6px;
+    padding:7px 12px;border:1px solid var(--line);border-radius:12px;
+    background:#fff;color:var(--ink-soft);font-weight:600;cursor:pointer;
+  }
+  .switcher:hover{background:var(--line-soft);}
+  .switcher .caret{color:var(--ink-mute);font-size:10px;}
+  .appbar .search{
+    margin-left:auto;display:flex;align-items:center;gap:6px;
+    width:min(240px,30vw);padding:8px 12px;border:1px solid var(--line);
+    border-radius:20px;background:#FAF6F0;color:var(--ink-mute);
+  }
+  .appbar .search input{border:0;background:transparent;outline:none;flex:1;font-size:13px;color:var(--ink);}
+  .appbar .me{
+    width:30px;height:30px;border-radius:50%;background:var(--blue);
+    color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px;
+  }
+
+  /* layout shell */
+  .shell{display:flex;min-height:calc(100vh - 52px - 31px);}
+
+  /* slim icon nav */
+  .iconnav{
+    width:60px;flex:0 0 60px;background:var(--navbg);
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    padding:14px 0;position:sticky;top:52px;height:calc(100vh - 52px);
+  }
+  .iconnav .nav-i{
+    width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+    color:#C9BCAD;font-size:19px;cursor:pointer;position:relative;
+    transition:background .15s ease,color .15s ease;
+  }
+  .iconnav .nav-i:hover{background:rgba(255,255,255,.10);color:#fff;}
+  .iconnav .nav-i.active{background:var(--blue);color:#fff;}
+  .iconnav .nav-i.active::before{
+    content:"";position:absolute;left:-13px;top:9px;bottom:9px;width:3px;
+    background:#fff;border-radius:0 3px 3px 0;
+  }
+  .iconnav .spacer{flex:1;}
+
+  /* main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  /* board toolbar */
+  .toolbar{
+    padding:18px 24px 12px;border-bottom:1px solid var(--line);background:var(--bg);
+  }
+  .crumbs{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-mute);margin-bottom:7px;}
+  .crumbs b{color:var(--ink-soft);}
+  .crumbs .sep{opacity:.6;}
+  .title-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .board-title{font-size:21px;font-weight:700;letter-spacing:-.2px;margin:0;}
+  .star{color:#E0A83C;font-size:15px;}
+
+  /* engagement row */
+  .engage{display:flex;align-items:center;gap:12px;margin-left:auto;flex-wrap:wrap;}
+  .streak{
+    display:flex;align-items:center;gap:6px;font-weight:700;color:var(--med-fg);
+    background:var(--med-bg);border:1px solid #F2E2C4;border-radius:22px;padding:6px 13px;font-size:12px;
+  }
+  .progress-wrap{display:flex;flex-direction:column;gap:5px;min-width:180px;}
+  .progress-lab{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-soft);font-weight:600;}
+  .progress-lab .done-hl{color:var(--done);}
+  .bar{height:8px;border-radius:20px;background:var(--line);overflow:hidden;}
+  .bar>span{display:block;height:100%;width:25%;background:linear-gradient(90deg,var(--done),#51CB6E);border-radius:20px;}
+
+  /* avatar stack */
+  .avatars{display:flex;align-items:center;}
+  .avatars .av{
+    width:30px;height:30px;border-radius:50%;color:#fff;font-weight:700;font-size:12px;
+    display:grid;place-items:center;border:2px solid var(--bg);margin-left:-7px;
+  }
+  .avatars .av:first-child{margin-left:0;}
+  .avatars .more{
+    width:30px;height:30px;border-radius:50%;background:#fff;color:var(--ink-mute);
+    border:2px solid var(--bg);display:grid;place-items:center;font-size:11px;font-weight:700;margin-left:-7px;
+  }
+
+  /* filter bar */
+  .filters{
+    display:flex;align-items:center;gap:9px;padding:12px 24px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);background:var(--surface);
+    position:sticky;top:52px;z-index:10;
+  }
+  .filters .lab{font-size:12px;color:var(--ink-mute);font-weight:600;text-transform:none;letter-spacing:0;margin-right:2px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;
+    border:1px solid var(--line);background:#fff;color:var(--ink-soft);font-weight:600;
+    font-size:12px;cursor:pointer;transition:background .15s ease,border-color .15s ease;
+  }
+  .chip:hover{background:var(--line-soft);}
+  .chip.on{background:#E9EFFB;border-color:#C3D2F6;color:var(--blue-deep);}
+  .chip .dotmark{width:14px;height:14px;border:1.5px solid currentColor;border-radius:5px;display:inline-block;}
+  .chip.on .dotmark{background:currentColor;position:relative;}
+  .chip.on .dotmark::after{content:"✓";position:absolute;inset:0;color:#fff;font-size:10px;display:grid;place-items:center;}
+  .sort{
+    margin-left:auto;display:flex;align-items:center;gap:7px;padding:7px 13px;
+    border:1px solid var(--line);border-radius:20px;background:#fff;color:var(--ink-soft);
+    font-weight:600;font-size:12px;cursor:pointer;
+  }
+  .sort:hover{background:var(--line-soft);}
+  .sort .caret{color:var(--ink-mute);font-size:10px;}
+  .sort select{border:0;background:transparent;font:inherit;color:var(--blue-deep);font-weight:700;outline:none;cursor:pointer;}
+
+  /* board */
+  .board{
+    display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:20px;
+    padding:22px 24px 44px;align-items:start;
+  }
+  /* ← 컬럼 배경 제거: 회색 박스 없이 카드가 배경 위에 바로 놓임 (C 스타일) */
+  .col{background:transparent;border-radius:0;padding:0;}
+  .col-head{
+    display:flex;align-items:center;gap:9px;padding:0 4px 11px;
+    border-bottom:1px solid var(--line);margin-bottom:12px;
+  }
+  .col-accent{width:9px;height:9px;border-radius:50%;}
+  .col-name{font-weight:700;font-size:13px;text-transform:none;letter-spacing:0;color:var(--ink-soft);}
+  .count{
+    font-size:11px;font-weight:700;color:var(--ink-mute);background:#fff;
+    border:1px solid var(--line);border-radius:20px;padding:2px 9px;
+  }
+  .wip{
+    margin-left:auto;font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;
+    background:var(--warn-bg);color:var(--warn-fg);border:1px solid #F2CDC3;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .col-todo .col-accent{background:var(--todo);}
+  .col-doing .col-accent{background:var(--doing);}
+  .col-done .col-accent{background:var(--done);}
+
+  .cards{display:flex;flex-direction:column;gap:11px;min-height:20px;}
+
+  /* card */
+  .card{
+    background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;
+    padding:14px 15px 14px;box-shadow:var(--shadow);cursor:pointer;
+    transition:box-shadow .16s ease,transform .16s ease;
+  }
+  .card:hover{box-shadow:var(--shadow-lift);transform:translateY(-2px);}
+  .card:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+  .card.done .card-title{color:var(--ink-mute);}
+  .card-top{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+  .type-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .t-story{background:#4CC08A;}
+  .t-task{background:#5B7CE0;}
+  .t-research{background:#9B8AD9;}
+  .key{
+    font-size:11px;font-weight:700;color:var(--ink-mute);letter-spacing:.3px;
+  }
+  .prio{
+    margin-left:auto;font-size:10.5px;font-weight:700;border-radius:20px;
+    padding:3px 9px;letter-spacing:0;display:inline-flex;align-items:center;gap:4px;
+  }
+  .prio .arrow{font-size:10px;line-height:1;}
+  .p-high{background:var(--high-bg);color:var(--high-fg);}
+  .p-med{background:var(--med-bg);color:var(--med-fg);}
+  .p-low{background:var(--low-bg);color:var(--low-fg);}
+  .card-title{font-size:14px;font-weight:600;color:var(--ink);margin:0 0 12px;line-height:1.45;}
+  .card-foot{display:flex;align-items:center;gap:8px;}
+  .due{
+    display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;
+    color:var(--ink-mute);
+  }
+  .due.soon{color:var(--warn-fg);background:var(--warn-bg);border:1px solid #F2CDC3;border-radius:20px;padding:2px 9px;font-weight:700;}
+  .due .ico{font-size:11px;}
+  .no-due{font-size:11.5px;color:#B0A597;}
+  .foot-right{margin-left:auto;display:flex;align-items:center;gap:7px;}
+  .av-sm{
+    width:26px;height:26px;border-radius:50%;color:#fff;font-weight:700;font-size:11px;
+    display:grid;place-items:center;
+  }
+  .av-unassigned{
+    width:26px;height:26px;border-radius:50%;border:1.5px dashed #C7BAA9;
+    color:#A8998A;display:grid;place-items:center;font-size:12px;background:repeating-linear-gradient(45deg,#FBF9F5,#FBF9F5 3px,#fff 3px,#fff 6px);
+  }
+  .unassigned-card{border-style:dashed;border-color:#E4DACB;background:#FEFCF8;}
+  .unassigned-tag{
+    font-size:10px;font-weight:700;color:#A8998A;background:#F6F1E9;
+    border:1px dashed #D8CBBA;border-radius:20px;padding:2px 8px;
+  }
+  .add-card{
+    margin-top:10px;display:flex;align-items:center;gap:6px;padding:10px;border-radius:12px;
+    color:var(--ink-mute);font-weight:600;font-size:12px;cursor:pointer;
+  }
+  .add-card:hover{background:#fff;color:var(--ink-soft);}
+
+  @media (max-width:700px){
+    .shell{flex-direction:column;}
+    .iconnav{flex-direction:row;width:100%;height:auto;position:static;padding:8px 10px;gap:6px;justify-content:flex-start;overflow-x:auto;}
+    .iconnav .spacer{display:none;}
+    .board{grid-template-columns:1fr;}
+    .appbar .search{display:none;}
+    .engage{width:100%;margin-left:0;}
+    .filters{position:static;}
+  }
+</style>
+</head>
+<body>
+
+<div class="caption">디자인 변형 1 · <b>Soft &amp; Warm</b> — 따뜻하고 부드러운 톤</div>
+
+<!-- TOP APP HEADER -->
+<header class="appbar">
+  <div class="brand"><span class="logo">K</span>KanFlow</div>
+  <button class="switcher">코어 프로덕트 보드 <span class="caret">▾</span></button>
+  <label class="search">
+    <span>🔍</span><input type="text" placeholder="이슈 검색 (예: CORE-14)" aria-label="이슈 검색">
+  </label>
+  <div class="me" title="지훈 (나)">지</div>
+</header>
+
+<div class="shell">
+
+  <!-- SLIM ICON NAV -->
+  <nav class="iconnav" aria-label="주요 메뉴">
+    <div class="nav-i active" title="보드">▦</div>
+    <div class="nav-i" title="백로그">☰</div>
+    <div class="nav-i" title="스프린트">⟳</div>
+    <div class="nav-i" title="리포트">📊</div>
+    <div class="nav-i" title="구성원">👥</div>
+    <div class="spacer"></div>
+    <div class="nav-i" title="설정">⚙</div>
+  </nav>
+
+  <div class="main">
+
+    <!-- BOARD TOOLBAR -->
+    <div class="toolbar">
+      <div class="crumbs">
+        <span>프로젝트</span><span class="sep">/</span>
+        <b>코어 프로덕트</b><span class="sep">/</span>
+        <span>스프린트 4</span>
+      </div>
+      <div class="title-row">
+        <h1 class="board-title"><span class="star">★</span> 코어 프로덕트 보드</h1>
+
+        <div class="engage">
+          <div class="streak">🔥 3일 연속</div>
+          <div class="progress-wrap">
+            <div class="progress-lab"><span>오늘 완료</span><span><span class="done-hl">2</span> / 8</span></div>
+            <div class="bar"><span></span></div>
+          </div>
+          <div class="avatars" title="보드 멤버">
+            <span class="av" style="background:#4C6EF5">지</span>
+            <span class="av" style="background:#2F9E44">수</span>
+            <span class="av" style="background:#E8940C">태</span>
+            <span class="av" style="background:#9C36B5">민</span>
+            <span class="av" style="background:#E03131">준</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER / SORT BAR -->
+    <div class="filters">
+      <span class="lab">필터</span>
+      <button class="chip" aria-pressed="false"><span class="dotmark"></span>내 카드만</button>
+      <button class="chip on" aria-pressed="true"><span class="dotmark"></span>이번 주 마감</button>
+      <button class="chip" aria-pressed="false"><span class="dotmark"></span>High만</button>
+      <label class="sort">정렬:
+        <select aria-label="정렬 방식">
+          <option>수동</option>
+          <option selected>내 것 우선</option>
+          <option>급한 것 우선</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- BOARD -->
+    <section class="board">
+
+      <!-- TO DO -->
+      <div class="col col-todo">
+        <div class="col-head">
+          <span class="col-accent"></span>
+          <span class="col-name">To Do</span>
+          <span class="count">3</span>
+        </div>
+        <div class="cards">
+
+          <article class="card" tabindex="0">
+            <div class="card-top">
+              <span class="type-dot t-task" title="작업"></span>
+              <span class="key">CORE-11</span>
+              <span class="prio p-high"><span class="arrow">▲</span>High</span>
+            </div>
+            <p class="card-title">로그인 API 설계</p>
+            <div class="card-foot">
+              <span class="due"><span class="ico">📅</span>07-03</span>
+              <span class="foot-right"><span class="av-sm" style="background:#2F9E44" title="수민">수</span></span>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0">
+            <div class="card-top">
+              <span class="type-dot t-story" title="스토리"></span>
+              <span class="key">CORE-12</span>
+              <span class="prio p-med"><span class="arrow">■</span>Medium</span>
+            </div>
+            <p class="card-title">온보딩 카피 작성</p>
+            <div class="card-foot">
+              <span class="due"><span class="ico">📅</span>07-05</span>
+              <span class="foot-right"><span class="av-sm" style="background:#9C36B5" title="민아">민</span></span>
+            </div>
+          </article>
+
+          <article class="card unassigned-card" tabindex="0">
+            <div class="card-top">
+              <span class="type-dot t-research" title="리서치"></span>
+              <span class="key">CORE-13</span>
+              <span class="prio p-low"><span class="arrow">▼</span>Low</span>
+            </div>
+            <p class="card-title">경쟁사 리서치</p>
+            <div class="card-foot">
+              <span class="no-due">마감 없음</span>
+              <span class="foot-right">
+                <span class="unassigned-tag">미배정</span>
+                <span class="av-unassigned" title="담당자 없음">?</span>
+              </span>
+            </div>
+          </article>
+
+          <div class="add-card">＋ 카드 추가</div>
+        </div>
+      </div>
+
+      <!-- DOING -->
+      <div class="col col-doing">
+        <div class="col-head">
+          <span class="col-accent"></span>
+          <span class="col-name">Doing</span>
+          <span class="count">3</span>
+          <span class="wip" title="진행 중 카드 제한(WIP)에 도달">⚠ 3 / 3</span>
+        </div>
+        <div class="cards">
+
+          <article class="card" tabindex="0">
+            <div class="card-top">
+              <span class="type-dot t-story" title="스토리"></span>
+              <span class="key">CORE-14</span>
+              <span class="prio p-high"><span class="arrow">▲</span>High</span>
+            </div>
+            <p class="card-title">메인 대시보드 UI</p>
+            <div class="card-foot">
+              <span class="due soon"><span class="ico">⏰</span>07-02 임박</span>
+              <span class="foot-right"><span class="av-sm" style="background:#E8940C" title="태오">태</span></span>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0">
+            <div class="card-top">
+              <span class="type-dot t-task" title="작업"></span>
+              <span class="key">CORE-15</span>
+              <span class="prio p-high"><span class="arrow">▲</span>High</span>
+            </div>
+            <p class="card-title">DB 스키마 마이그레이션</p>
+            <div class="card-foot">
+              <span class="due soon"><span class="ico">🔥</span>오늘 마감</span>
+              <span class="foot-right"><span class="av-sm" style="background:#E03131" title="준">준</span></span>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0">
+            <div class="card-top">
+              <span class="type-dot t-task" title="작업"></span>
+              <span class="key">CORE-16</span>
+              <span class="prio p-med"><span class="arrow">■</span>Medium</span>
+            </div>
+            <p class="card-title">결제 모듈 연동</p>
+            <div class="card-foot">
+              <span class="no-due">마감 없음</span>
+              <span class="foot-right"><span class="av-sm" style="background:#2F9E44" title="수민">수</span></span>
+            </div>
+          </article>
+
+          <div class="add-card">＋ 카드 추가</div>
+        </div>
+      </div>
+
+      <!-- DONE -->
+      <div class="col col-done">
+        <div class="col-head">
+          <span class="col-accent"></span>
+          <span class="col-name">Done</span>
+          <span class="count">2</span>
+        </div>
+        <div class="cards">
+
+          <article class="card done" tabindex="0">
+            <div class="card-top">
+              <span class="type-dot t-story" title="스토리"></span>
+              <span class="key">CORE-17</span>
+              <span class="prio p-low" style="opacity:.7"><span>✓</span>완료</span>
+            </div>
+            <p class="card-title">프로젝트 킥오프</p>
+            <div class="card-foot">
+              <span class="due"><span class="ico">✔</span>완료됨</span>
+              <span class="foot-right"><span class="av-sm" style="background:#4C6EF5" title="지훈">지</span></span>
+            </div>
+          </article>
+
+          <article class="card done" tabindex="0">
+            <div class="card-top">
+              <span class="type-dot t-task" title="작업"></span>
+              <span class="key">CORE-18</span>
+              <span class="prio p-low" style="opacity:.7"><span>✓</span>완료</span>
+            </div>
+            <p class="card-title">레포 세팅</p>
+            <div class="card-foot">
+              <span class="due"><span class="ico">✔</span>완료됨</span>
+              <span class="foot-right"><span class="av-sm" style="background:#E03131" title="준">준</span></span>
+            </div>
+          </article>
+
+          <div class="add-card">＋ 카드 추가</div>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코어 프로덕트 보드 — 시안 A</title>
+<style>
+  :root{
+    --board-bg:#eef0f4;
+    --paper:#ffffff;
+    --ink:#2b2f38;
+    --ink-soft:#6b7280;
+    --ink-faint:#9aa1ad;
+    --line:#e4e7ec;
+    --accent:#4C6EF5;
+    --warn:#E8940C;
+    --danger:#E03131;
+    --ok:#2F9E44;
+    --chip:#f4f5f8;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(24,28,40,.06), 0 3px 8px rgba(24,28,40,.05);
+    --shadow-hover:0 2px 4px rgba(24,28,40,.08), 0 8px 20px rgba(24,28,40,.09);
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--board-bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  a{color:inherit}
+
+  /* caption strip */
+  .caption{
+    background:#282c35;color:#cfd3dc;font-size:12.5px;letter-spacing:.2px;
+    padding:8px 22px;text-align:center;font-weight:500}
+  .caption b{color:#fff;font-weight:600}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 22px 60px}
+
+  /* ---------- HEADER ---------- */
+  header.board-head{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:20px 24px;margin-bottom:24px}
+  .head-top{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;justify-content:space-between}
+  .title-block{display:flex;flex-direction:column;gap:10px;min-width:230px}
+  .title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  h1{font-size:22px;font-weight:700;letter-spacing:-.4px}
+  .streak{
+    display:inline-flex;align-items:center;gap:5px;
+    background:#fff4e6;color:#c26808;border:1px solid #ffe0b8;
+    font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px}
+
+  .members{display:flex;align-items:center}
+  .members .avatar{margin-left:-7px;border:2.5px solid var(--paper)}
+  .members .avatar:first-child{margin-left:0}
+  .members-label{font-size:12.5px;color:var(--ink-faint);margin-left:10px}
+
+  .avatar{
+    width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+    display:inline-flex;align-items:center;justify-content:center;
+    color:#fff;font-size:12.5px;font-weight:700;line-height:1}
+
+  /* progress */
+  .progress-block{margin-top:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .progress-label{font-size:13px;color:var(--ink-soft);font-weight:600;white-space:nowrap}
+  .progress-label b{color:var(--ink)}
+  .bar{flex:1;min-width:180px;height:9px;border-radius:999px;background:#e9ebf0;overflow:hidden}
+  .bar > span{display:block;height:100%;width:25%;border-radius:999px;
+    background:linear-gradient(90deg,#4C6EF5,#5b8def)}
+  .progress-pct{font-size:12.5px;color:var(--ink-faint);font-weight:600}
+
+  /* filter / sort controls */
+  .controls{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .controls .grp{display:flex;gap:7px;flex-wrap:wrap}
+  .toggle{
+    font:inherit;font-size:12.5px;font-weight:500;color:var(--ink-soft);
+    background:var(--chip);border:1px solid var(--line);
+    padding:7px 13px;border-radius:999px;cursor:pointer;transition:.15s}
+  .toggle:hover{background:#eceef3;color:var(--ink)}
+  .toggle.active{background:#eef2ff;border-color:#c7d2fe;color:#3b56c9}
+  .toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .spacer{flex:1}
+  .sort{display:flex;align-items:center;gap:8px}
+  .sort label{font-size:12.5px;color:var(--ink-faint);font-weight:600}
+  select{
+    font:inherit;font-size:12.5px;font-weight:500;color:var(--ink);
+    background:var(--paper);border:1px solid var(--line);
+    padding:7px 30px 7px 12px;border-radius:9px;cursor:pointer;
+    appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 10px center}
+  select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* ---------- BOARD ---------- */
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+  .column{background:#e6e9ef;border-radius:var(--radius);padding:12px 12px 14px;
+    display:flex;flex-direction:column;gap:10px}
+  .col-head{display:flex;align-items:center;gap:9px;padding:4px 6px 2px}
+  .col-title{font-size:13.5px;font-weight:700;letter-spacing:.2px;color:#40454f}
+  .count{
+    font-size:11.5px;font-weight:700;color:var(--ink-soft);
+    background:#d7dbe3;border-radius:999px;min-width:20px;height:20px;
+    padding:0 6px;display:inline-flex;align-items:center;justify-content:center}
+  .count.wip{background:#ffe9d0;color:#b5680a}
+  .wip-note{font-size:11px;color:#b5680a;font-weight:600;margin-left:auto}
+
+  /* card */
+  .card{
+    background:var(--paper);border:1px solid #edeff3;border-radius:11px;
+    box-shadow:var(--shadow);padding:12px 13px 11px;
+    display:flex;flex-direction:column;gap:9px;cursor:pointer;transition:.15s}
+  .card:hover{box-shadow:var(--shadow-hover);transform:translateY(-1px)}
+  .card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .card.done .card-title{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:#d6dae1}
+
+  .card-top{display:flex;align-items:center;gap:7px}
+  .prio{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
+  .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .dot.high{background:var(--danger)}
+  .dot.med{background:var(--warn)}
+  .dot.low{background:#adb5bd}
+  .prio.high{color:var(--danger)}
+  .prio.med{color:#b5680a}
+  .prio.low{color:var(--ink-faint)}
+
+  .card-title{font-size:14px;font-weight:600;letter-spacing:-.2px;color:var(--ink);line-height:1.4}
+
+  .card-foot{display:flex;align-items:center;gap:8px;margin-top:1px}
+  .avatar-sm{width:26px;height:26px;font-size:11px}
+  .avatar-un{background:transparent;color:var(--ink-faint);
+    border:1.5px dashed #c2c8d2;font-weight:600}
+  .foot-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+
+  .due{
+    display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+    background:var(--chip);color:var(--ink-soft);padding:3px 9px;border-radius:999px}
+  .due.soon{background:#fff4e6;color:#c26808}
+  .due.today{background:#ffe9e9;color:#c92a2a}
+  .due-none{color:var(--ink-faint);font-size:11.5px;font-weight:500}
+
+  .add-card{
+    display:flex;align-items:center;gap:7px;
+    font:inherit;font-size:12.5px;font-weight:600;color:var(--ink-soft);
+    background:transparent;border:1px dashed #c8cdd6;border-radius:10px;
+    padding:10px 12px;cursor:pointer;transition:.15s;width:100%;text-align:left}
+  .add-card:hover{background:#dfe3ea;color:var(--ink);border-color:#b4bac6}
+  .add-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .add-card .plus{font-size:15px;line-height:1}
+
+  @media (max-width:700px){
+    .wrap{padding:18px 14px 44px}
+    .board{grid-template-columns:1fr}
+    .head-top{flex-direction:column}
+    .members{margin-top:4px}
+    .spacer{display:none}
+    .sort{width:100%}
+    select{flex:1}
+  }
+</style>
+</head>
+<body>
+  <div class="caption">시안 A — <b>Trello 스타일</b> · 가로 3컬럼 보드</div>
+
+  <div class="wrap">
+    <!-- ============ HEADER ============ -->
+    <header class="board-head">
+      <div class="head-top">
+        <div class="title-block">
+          <div class="title-row">
+            <h1>코어 프로덕트 보드</h1>
+            <span class="streak">🔥 3일 연속</span>
+          </div>
+        </div>
+        <div class="members" aria-label="팀 멤버">
+          <span class="avatar" style="background:#4C6EF5" title="지훈 (PM)">지</span>
+          <span class="avatar" style="background:#2F9E44" title="수민">수</span>
+          <span class="avatar" style="background:#E8940C" title="태오">태</span>
+          <span class="avatar" style="background:#9C36B5" title="민아">민</span>
+          <span class="avatar" style="background:#E03131" title="준">준</span>
+          <span class="members-label">멤버 5명</span>
+        </div>
+      </div>
+
+      <div class="progress-block">
+        <span class="progress-label">오늘 완료 <b>2 / 8</b></span>
+        <div class="bar" role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="8"><span></span></div>
+        <span class="progress-pct">25%</span>
+      </div>
+
+      <div class="controls">
+        <div class="grp" role="group" aria-label="필터">
+          <button class="toggle" type="button">내 카드만</button>
+          <button class="toggle" type="button">이번 주 마감</button>
+          <button class="toggle" type="button">High만</button>
+        </div>
+        <div class="spacer"></div>
+        <div class="sort">
+          <label for="sortsel">정렬</label>
+          <select id="sortsel">
+            <option>수동</option>
+            <option>내 것 우선</option>
+            <option>급한 것 우선</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ BOARD ============ -->
+    <main class="board">
+
+      <!-- TO DO -->
+      <section class="column" aria-label="To Do">
+        <div class="col-head">
+          <span class="col-title">To Do</span>
+          <span class="count">3</span>
+        </div>
+
+        <article class="card" tabindex="0">
+          <div class="card-top"><span class="prio high"><span class="dot high"></span>High</span></div>
+          <div class="card-title">로그인 API 설계</div>
+          <div class="card-foot">
+            <span class="avatar avatar-sm" style="background:#2F9E44" title="수민">수</span>
+            <div class="foot-right"><span class="due">📅 07-03</span></div>
+          </div>
+        </article>
+
+        <article class="card" tabindex="0">
+          <div class="card-top"><span class="prio med"><span class="dot med"></span>Medium</span></div>
+          <div class="card-title">온보딩 카피 작성</div>
+          <div class="card-foot">
+            <span class="avatar avatar-sm" style="background:#9C36B5" title="민아">민</span>
+            <div class="foot-right"><span class="due">📅 07-05</span></div>
+          </div>
+        </article>
+
+        <article class="card" tabindex="0">
+          <div class="card-top"><span class="prio low"><span class="dot low"></span>Low</span></div>
+          <div class="card-title">경쟁사 리서치</div>
+          <div class="card-foot">
+            <span class="avatar avatar-sm avatar-un" title="미배정">?</span>
+            <div class="foot-right"><span class="due-none">마감 없음</span></div>
+          </div>
+        </article>
+
+        <button class="add-card" type="button"><span class="plus">+</span> 카드 추가</button>
+      </section>
+
+      <!-- DOING -->
+      <section class="column" aria-label="Doing">
+        <div class="col-head">
+          <span class="col-title">Doing</span>
+          <span class="count wip">3</span>
+          <span class="wip-note">WIP 권장 2</span>
+        </div>
+
+        <article class="card" tabindex="0">
+          <div class="card-top"><span class="prio high"><span class="dot high"></span>High</span></div>
+          <div class="card-title">메인 대시보드 UI</div>
+          <div class="card-foot">
+            <span class="avatar avatar-sm" style="background:#E8940C" title="태오">태</span>
+            <div class="foot-right"><span class="due soon">⏰ 07-02 임박</span></div>
+          </div>
+        </article>
+
+        <article class="card" tabindex="0">
+          <div class="card-top"><span class="prio high"><span class="dot high"></span>High</span></div>
+          <div class="card-title">DB 스키마 마이그레이션</div>
+          <div class="card-foot">
+            <span class="avatar avatar-sm" style="background:#E03131" title="준">준</span>
+            <div class="foot-right"><span class="due today">🔴 오늘 마감</span></div>
+          </div>
+        </article>
+
+        <article class="card" tabindex="0">
+          <div class="card-top"><span class="prio med"><span class="dot med"></span>Medium</span></div>
+          <div class="card-title">결제 모듈 연동</div>
+          <div class="card-foot">
+            <span class="avatar avatar-sm" style="background:#2F9E44" title="수민">수</span>
+            <div class="foot-right"><span class="due-none">마감 없음</span></div>
+          </div>
+        </article>
+
+        <button class="add-card" type="button"><span class="plus">+</span> 카드 추가</button>
+      </section>
+
+      <!-- DONE -->
+      <section class="column" aria-label="Done">
+        <div class="col-head">
+          <span class="col-title">Done</span>
+          <span class="count">2</span>
+        </div>
+
+        <article class="card done" tabindex="0">
+          <div class="card-top"><span class="prio low"><span class="dot" style="background:#2F9E44"></span>완료</span></div>
+          <div class="card-title">프로젝트 킥오프</div>
+          <div class="card-foot">
+            <span class="avatar avatar-sm" style="background:#4C6EF5" title="지훈">지</span>
+            <div class="foot-right"><span class="due" style="background:#e9f5ec;color:#2f9e44">✓ 완료</span></div>
+          </div>
+        </article>
+
+        <article class="card done" tabindex="0">
+          <div class="card-top"><span class="prio low"><span class="dot" style="background:#2F9E44"></span>완료</span></div>
+          <div class="card-title">레포 세팅</div>
+          <div class="card-foot">
+            <span class="avatar avatar-sm" style="background:#E03131" title="준">준</span>
+            <div class="foot-right"><span class="due" style="background:#e9f5ec;color:#2f9e44">✓ 완료</span></div>
+          </div>
+        </article>
+
+        <button class="add-card" type="button"><span class="plus">+</span> 카드 추가</button>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>
