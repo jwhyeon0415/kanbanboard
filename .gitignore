@@ -44,3 +44,6 @@ next-env.d.ts
 .vscode/
 .idea/
 .obsidian/
+
+# local-only handover note (not shared)
+/HANDOVER.md
